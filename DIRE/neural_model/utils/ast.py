@@ -199,10 +199,11 @@ class TerminalNode(SyntaxNode):
 
 
 class AbstractSyntaxTree(object):
-    def __init__(self, root: SyntaxNode, compilation_unit: str = None, code: str = None):
+    def __init__(self, root: SyntaxNode, compilation_unit: str = None, code: str = None, label = None):
         self.root = root
         self.compilation_unit = compilation_unit
         self.code = code
+        self.label = label
 
         self.adjacency_list = None
         self.id_to_node = None
@@ -216,7 +217,10 @@ class AbstractSyntaxTree(object):
     def from_json_dict(cls, json_dict: Dict) -> 'AbstractSyntaxTree':
         root = SyntaxNode.from_json_dict(json_dict['ast'])
         root.name = json_dict['function']
-        tree = cls(root, compilation_unit=json_dict['function'], code=json_dict['raw_code'] if 'raw_code' in json_dict else None)
+
+        label = json_dict['code_tokens'][0]
+
+        tree = cls(root, compilation_unit=json_dict['function'], code=json_dict['raw_code'] if 'raw_code' in json_dict else None, label = label)
 
         return tree
 
@@ -247,6 +251,17 @@ class AbstractSyntaxTree(object):
                 terminal_nodes.append(node)
 
         _index_sub_tree(self.root, None)
+
+        all_nodes = list(id2node.values())
+        next_id = len(all_nodes)
+
+        label_node = SyntaxNode(next_id, "label", None, all_nodes, {"domain": self.label})
+        
+        # Update the indexing structures with the new labeled constructs.
+        for n in all_nodes:
+            adj_list.append((label_node, n))
+
+        id2node[label_node.node_id] = label_node
 
         setattr(self, 'adjacency_list', adj_list)
         setattr(self, 'id_to_node', id2node)
