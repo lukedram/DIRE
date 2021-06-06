@@ -8,6 +8,7 @@ Options:
     --use-bpe                  Use bpe
     --size=<int>               vocab size [default: 10000]
     --freq-cutoff=<int>        frequency cutoff [default: 2]
+    --user-tokens=<string>     comma separated list of user-defined tokens.
 """
 
 from collections import Counter
@@ -188,7 +189,12 @@ if __name__ == '__main__':
     train_set = Dataset(args['TRAIN_FILE'])
 
     src_code_tokens_file = vocab_file + '.src_code_tokens.txt'
-    src_preserved_tokens = set()
+
+    # Any special tokens (like labels) that the user wants preserved.
+    user_tokens_str = args['--user-tokens']
+    user_tokens = set(user_tokens_str.split(",")) if user_tokens_str else set()
+    src_preserved_tokens = user_tokens
+
     f_src_token = open(src_code_tokens_file, 'w')
 
     # extract vocab and node types
@@ -279,6 +285,7 @@ if __name__ == '__main__':
                                    bos_id=1,
                                    eos_id=2,
                                    unk_id=3,
+                                   user_defined_symbols=list(user_tokens),
                                    control_symbols=[SAME_VARIABLE_TOKEN],
                                    vocab_size=vocab_size,
                                    model_prefix=f"{vocab_file}.obj_name",
