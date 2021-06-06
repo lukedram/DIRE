@@ -349,6 +349,13 @@ class GraphASTEncoder(Encoder):
                     node_sub_tokens = obj_name_bpe_model.encode_as_ids(node.name)
                     sub_tokens_list.append(node_sub_tokens)
                     node_with_subtokens_indices.append(i)
+                
+                # The contents of the label are important, not simply whether or not a label is present.
+                if node.node_type == "label":
+                    # compute variable embedding
+                    node_sub_tokens = obj_name_bpe_model.encode_as_ids(node.label)
+                    sub_tokens_list.append(node_sub_tokens)
+                    node_with_subtokens_indices.append(i)
 
                 if hasattr(node, 'type_tokens'):
                     node_type_tokens = [vocab.grammar.variable_type_to_id(t) for t in node.type_tokens]
@@ -372,7 +379,7 @@ class GraphASTEncoder(Encoder):
             sub_tokens_indices.fill(obj_name_bpe_pad_idx)
             for i, token_ids in enumerate(sub_tokens_list):
                 sub_tokens_indices[i, :len(token_ids)] = token_ids
-
+                
             sub_tokens_indices = torch.from_numpy(sub_tokens_indices)
 
         max_typetoken_num = max(len(x) for x in node_type_tokens_list)
