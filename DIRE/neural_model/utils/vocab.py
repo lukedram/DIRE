@@ -192,7 +192,7 @@ if __name__ == '__main__':
     f_src_token = open(src_code_tokens_file, 'w')
 
     # extract vocab and node types
-    node_types = set()
+    node_types = set("label") # "label" is not found as part of the AST, but is added during later processing
     src_words = []
     tgt_words = []
     identifier_names = []
