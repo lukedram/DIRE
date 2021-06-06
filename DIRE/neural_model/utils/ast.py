@@ -263,6 +263,8 @@ class AbstractSyntaxTree(object):
 
         id2node[label_node.node_id] = label_node
 
+        self.root = label_node
+
         setattr(self, 'adjacency_list', adj_list)
         setattr(self, 'id_to_node', id2node)
         setattr(self, 'adjacent_terminal_nodes', [])  # TODO: implement this!
