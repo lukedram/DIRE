@@ -252,14 +252,8 @@ class AbstractSyntaxTree(object):
 
         _index_sub_tree(self.root, None)
 
-        all_nodes = list(id2node.values())
-        next_id = len(all_nodes)
-
-        label_node = SyntaxNode(next_id, "label", None, all_nodes, {"label": self.label})
-        
-        # Update the indexing structures with the new labeled constructs.
-        for n in all_nodes:
-            adj_list.append((label_node, n))
+        next_id = len(id2node)
+        label_node = SyntaxNode(next_id, "label", None, None, {"label": self.label})
 
         id2node[label_node.node_id] = label_node
 
