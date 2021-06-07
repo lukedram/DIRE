@@ -226,7 +226,7 @@ class AbstractSyntaxTree(object):
 
     @property
     def size(self):
-        return self.root.size
+        return len(self.id_to_node)   # self.root.size
 
     def _init_index(self):
         adj_list = []
