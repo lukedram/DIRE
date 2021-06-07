@@ -96,7 +96,8 @@ class GraphASTEncoder(Encoder):
             'terminals': 2,
             'master_node': 2,
             'var_usage': 2,
-            'func_root_to_arg': 1
+            'func_root_to_arg': 1,
+            'label_to_ast_node': 1
         }
         num_edge_types = sum(connection2edge_type[key] for key in connections)
         gnn = GatedGraphNeuralNetwork(hidden_size=params['gnn']['hidden_size'],
@@ -166,6 +167,7 @@ class GraphASTEncoder(Encoder):
         max_variable_num = max(len(ast.variables) for ast in asts)
 
         node_adj_list = []
+        label_adj_list = []
         terminal_nodes_adj_list = []
         master_node_adj_list = []
         var_master_nodes_adj_list = []
@@ -188,6 +190,13 @@ class GraphASTEncoder(Encoder):
                 succ_node_packed_id = packed_graph.get_packed_node_id(ast_id, succ_node)
 
                 node_adj_list.append((prev_node_packed_id, succ_node_packed_id))
+            
+            # The label node is associated with all ast nodes except itself.
+            label_node_id = packed_graph.get_packed_node_id(ast_id, ast.root) # The root node is the label node.
+
+            label_adj_list.extend([
+                (label_node_id, packed_graph.get_packed_node_id(ast_id, node)) for node in ast if node.node_id != ast.root.node_id
+            ])
 
             if 'terminals' in connections:
                 for i in range(len(ast.terminal_nodes) - 1):
@@ -267,6 +276,8 @@ class GraphASTEncoder(Encoder):
             reversed_master_node_adj_list = [(n2, n1) for n1, n2 in master_node_adj_list]
             adj_lists.append(master_node_adj_list)
             adj_lists.append(reversed_master_node_adj_list)
+        if 'label_to_ast_node' in connections:
+            adj_lists.append(label_adj_list)
         # if 'self_loop' in connections:
         #     self_loop_adj_list = [(n, n) for n in packed_graph.get_nodes_by_group('ast')]
 
